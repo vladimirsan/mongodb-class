@@ -16,3 +16,9 @@ server.listen(PORT, () => {
 // 10055  git status
 // 10056  git add -A
 // 10057  git commit -am "first commit"
+
+
+// 10063  git remote add origin https://github.com/vladimirsan/mongodb-class.git
+// 10064  git status
+// 10065  git commit -am 'changes to server.js'
+// 10066  git push -u origin main
