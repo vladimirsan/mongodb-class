@@ -92,38 +92,3 @@
 //    await mongoose.connect(process.env.MONGO_URI, { 
 //         dbName: "class_20_questions" });
 // });
-
-
-process.loadEnvFile(__dirname + "/.env"); //!
-
-const express = require("express");
-const mongoose = require("mongoose");
-
-const server = express();
-const PORT = 3100;
-
-// ALlows me to have json as a request body
-server.use(express.json());
-const Questions = mongoose.model("Question", new mongoose.Schema({text:String}));
-
-server.post("/questions", async (request, response) => {
-    console.log(request.body.question);
-
-    // we use new because mongoose.Schema is a 'factory' of objects (i.e a Class)
-
-    // I'm going to create a new value in the database that looks like this {text: "What is your name?"}
-    // This line is going to the internet and creating a value in the cloud
-    // stop everything here until you get your response from the internet
-    await Questions.create({text: request.body.question});
-
-    response.status(201).send(); // No Content -> Often use for creation
-});
-
-server.listen(PORT, () => {
-    console.log("Server is Ready!");
-    console.log("My Mongo URI is", process.env.MONGO_URI); //!
-
-    mongoose.connect(process.env.MONGO_URI, {
-        dbName: "class19_questions"
-    });
-});
