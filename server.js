@@ -13,13 +13,19 @@ const PORT = 3100;
 // ALlows me to have json as a request body
 server.use(express.json());
 
+function requestLoggerMiddleware(request, response, next) {
+  console.log(`${request.method} ${request.path}`);
+  next();
+}
+
+server.use(requestLoggerMiddleware);
+
 const questionSchema = new mongoose.Schema({
     question:String,
     answer:String
 }); // shape of the data
 
 const Questions = mongoose.model("Question", questionSchema); // helper to create data in that shape
-
 
 server.get(
     '/questions', 
@@ -43,10 +49,27 @@ server.get('/questions/:id', async (request, response) => {
     }
 });
 
-server.put('/questions/:id', () => {
+server.put('/questions/:id', async (request, response) => {
+    const isInvalidBody = !mongoose.isValidObjectId(request.params.id) || typeof request.body.question !== 'string' || typeof request.body.answer !== 'string';
+
+    if (isInvalidBody) {
+        return response.status(400).json({ error: "Invalid Question" });
+    }
+
+    const questionFound = await Questions.findById(request.params.id);
+    if (!questionFound) {
+        return response.status(404).send();
+    }
+
+    questionFound.question = request.body.question;
+    questionFound.answer = request.body.answer;
+
+    await questionFound.save();
+    response.json(questionFound);
 });
 
 server.delete('/questions/:id', () => {
+    //   await bookFound.deleteOne();
 });
 
 
@@ -66,6 +89,12 @@ server.post("/questions", async (request, response) => {
 
     response.status(201).json(documentIJustCreated); // No Content -> Often use for creation
 });
+
+app.use((error, request, response, next) => {
+  console.error(error);
+  response.status(500).json({ error: "Something went wrong with the application." });
+});
+
 
 server.listen(PORT, () => {
     console.log("Server is Ready!");
