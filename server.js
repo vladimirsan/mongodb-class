@@ -68,6 +68,8 @@ server.get('/questions/:id', async (request, response, next) => {
 });
 
 
+// you'll need the GET paths to be able to test this properly in postman
+// build this put handler and a delete handler
 // handler
 server.put('/questions/:id', async (request, response) => {
     const isInvalidBody = !mongoose.isValidObjectId(request.params.id) 
