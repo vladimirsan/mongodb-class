@@ -10,11 +10,15 @@ const server = express();
 const PORT = 3100;
 
 
-// ALlows me to have json as a request body
+// ---------------------------------------------------------------------------------------------
+// BEFORE
+// Server.use is used to register middleware
 server.use(express.json());
 
+// middleware are just functions with specific shapes
 function requestLoggerMiddleware(request, response, next) {
-  console.log(`${request.method} ${request.path}`);
+  console.log(`Log Record: ${request.method} ${request.path}`);
+    //   return response(404).send(); // Research - Why did this line break?
   next();
 }
 
@@ -27,6 +31,8 @@ const questionSchema = new mongoose.Schema({
 
 const Questions = mongoose.model("Question", questionSchema); // helper to create data in that shape
 
+// ---------------------------------------------------------------------------------------------
+// handler
 server.get(
     '/questions', 
     async (request, response) => {
@@ -35,28 +41,45 @@ server.get(
     }
 );
 
-server.get('/questions/:id', async (request, response) => {
+// handler
+server.get('/questions/:id', async (request, response, next) => {
     try{
         console.log(`The id from the client is ${request.params.id}`)
         const questionFound = await Questions.findById(request.params.id);
 
         console.log(questionFound);
 
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+        // ....
+
         response.json(questionFound);
     }catch(e){
-        console.log(e);
-        response.status(400).send();
+        next(e);
     }
 });
 
+
+// handler
 server.put('/questions/:id', async (request, response) => {
-    const isInvalidBody = !mongoose.isValidObjectId(request.params.id) || typeof request.body.question !== 'string' || typeof request.body.answer !== 'string';
+    const isInvalidBody = !mongoose.isValidObjectId(request.params.id) 
+    || typeof request.body.question !== 'string' 
+    || typeof request.body.answer !== 'string';
 
     if (isInvalidBody) {
         return response.status(400).json({ error: "Invalid Question" });
     }
 
     const questionFound = await Questions.findById(request.params.id);
+    // if (questionFound === undefined) {
     if (!questionFound) {
         return response.status(404).send();
     }
@@ -64,6 +87,7 @@ server.put('/questions/:id', async (request, response) => {
     questionFound.question = request.body.question;
     questionFound.answer = request.body.answer;
 
+    // try/catch
     await questionFound.save();
     response.json(questionFound);
 });
@@ -90,9 +114,13 @@ server.post("/questions", async (request, response) => {
     response.status(201).json(documentIJustCreated); // No Content -> Often use for creation
 });
 
-app.use((error, request, response, next) => {
-  console.error(error);
-  response.status(500).json({ error: "Something went wrong with the application." });
+// ---------------------------------------------------------------------------------------------
+// AFTER
+
+// use -> middleware
+server.use((error, request, response, next) => { // this is an error middleware because it has four arguments
+  console.log(error);
+  response.status(500).json({ error: " ACME CORP - Something went wrong with the application" });
 });
 
 
@@ -105,3 +133,5 @@ server.listen(PORT, () => {
         dbName: "class19_questions"
     });
 });
+
+// ---------------------------------------------------------------------------------------------
